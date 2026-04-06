@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PropFlow — Rental Property Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+    *{
+        user-select: none;
+    }
+  :root {
+    --bg: #0a0b0f;
+    --surface: #111318;
+    --surface2: #181c23;
+    --surface3: #1e2330;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --accent: #4f8ef7;
+    --accent2: #7b5ea7;
+    --accent3: #2dd4bf;
+    --gold: #f0b429;
+    --red: #ef4444;
+    --green: #22c55e;
+    --text: #e8eaf0;
+    --text2: #8b92a8;
+    --text3: #4d5568;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-accent: 0 0 30px rgba(79,142,247,0.15);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --sidebar: 260px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* ─── AUTH PAGES ─── */
+  .auth-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 20% 50%, rgba(79,142,247,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(123,94,167,0.06) 0%, transparent 50%),
+                var(--bg);
+    padding: 24px;
+  }
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 48px 44px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: var(--shadow), var(--shadow-accent);
+    animation: slideUp 0.4s ease;
+  }
+  .auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+  .auth-logo-icon {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 16px rgba(79,142,247,0.3);
+  }
+  .auth-logo span { font-family: var(--font-head); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .auth-card h1 { font-family: var(--font-head); font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .auth-card p { color: var(--text2); font-size: 14px; margin-bottom: 32px; }
+  /* ─── FORMS ─── */
+  .form-group { margin-bottom: 18px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 7px; letter-spacing: 0.3px; }
+  input, select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
+  }
+  select option { background: var(--surface2); }
+  textarea { resize: vertical; min-height: 80px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 22px;
+    border-radius: var(--radius-sm);
+    border: none; cursor: pointer;
+    font-family: var(--font-body); font-size: 14px; font-weight: 600;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #6366f1);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(79,142,247,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,142,247,0.45); }
+  .btn-secondary { background: var(--surface3); color: var(--text); border: 1px solid var(--border2); }
+  .btn-secondary:hover { background: var(--surface2); border-color: var(--accent); }
+  .btn-danger { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+  .btn-danger:hover { background: rgba(239,68,68,0.25); }
+  .btn-success { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+  .btn-success:hover { background: rgba(34,197,94,0.25); }
+  .btn-sm { padding: 7px 14px; font-size: 13px; }
+  .btn-full { width: 100%; }
+  .btn-icon { padding: 8px; border-radius: 8px; }
+  /* ─── LAYOUT ─── */
+  .app-layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: var(--sidebar);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; height: 100vh;
+    z-index: 100;
+    transition: transform 0.3s;
+  }
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 24px 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .sidebar-logo span { font-family: var(--font-head); font-size: 18px; font-weight: 800; }
+  .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+  .nav-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+    color: var(--text3); text-transform: uppercase;
+    padding: 16px 10px 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px; font-weight: 500; color: var(--text2);
+    transition: all 0.2s;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(79,142,247,0.12); color: var(--accent); }
+  .nav-item.active .nav-icon { color: var(--accent); }
+  .nav-icon { font-size: 17px; width: 20px; text-align: center; }
+  .sidebar-footer {
+    padding: 16px 12px;
+    border-top: 1px solid var(--border);
+  }
+  .user-chip {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .user-chip:hover { border-color: var(--border2); }
+  .user-avatar {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; overflow: hidden; }
+  .user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text2); text-transform: capitalize; }
+  /* ─── MAIN CONTENT ─── */
+  .main-content {
+    margin-left: var(--sidebar);
+    flex: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; }
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+  .page-content { padding: 32px; flex: 1; }
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .card-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; }
+  /* ─── STATS GRID ─── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .stat-card.blue::before { background: linear-gradient(90deg, var(--accent), #6366f1); }
+  .stat-card.purple::before { background: linear-gradient(90deg, var(--accent2), #ec4899); }
+  .stat-card.teal::before { background: linear-gradient(90deg, var(--accent3), #22c55e); }
+  .stat-card.gold::before { background: linear-gradient(90deg, var(--gold), #f97316); }
+  .stat-card.red::before { background: linear-gradient(90deg, var(--red), #f97316); }
+  .stat-card.green::before { background: linear-gradient(90deg, var(--green), var(--accent3)); }
+  .stat-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 14px;
+  }
+  .stat-icon.blue { background: rgba(79,142,247,0.12); }
+  .stat-icon.purple { background: rgba(123,94,167,0.15); }
+  .stat-icon.teal { background: rgba(45,212,191,0.12); }
+  .stat-icon.gold { background: rgba(240,180,41,0.12); }
+  .stat-icon.red { background: rgba(239,68,68,0.12); }
+  .stat-icon.green { background: rgba(34,197,94,0.12); }
+  .stat-value { font-family: var(--font-head); font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 13px; color: var(--text2); font-weight: 400; }
+  /* ─── TABLE ─── */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody td { padding: 13px 16px; font-size: 14px; }
+  /* ─── BADGES ─── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 100px;
+    font-size: 12px; font-weight: 600;
+  }
+  .badge-green { background: rgba(34,197,94,0.12); color: var(--green); }
+  .badge-red { background: rgba(239,68,68,0.12); color: var(--red); }
+  .badge-gold { background: rgba(240,180,41,0.12); color: var(--gold); }
+  .badge-blue { background: rgba(79,142,247,0.12); color: var(--accent); }
+  .badge-purple { background: rgba(123,94,167,0.15); color: #a78bfa; }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 18px;
+    padding: 32px;
+    width: 100%; max-width: 520px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: var(--shadow);
+    animation: slideUp 0.3s ease;
+    position: relative;
+  }
+  .modal-wide { max-width: 680px; }
+  .modal h2 { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .modal p { color: var(--text2); font-size: 13px; margin-bottom: 24px; }
+  .modal-close {
+    position: absolute; top: 20px; right: 20px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text2); cursor: pointer;
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: all 0.2s;
+  }
+  .modal-close:hover { background: var(--surface3); color: var(--text); }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+  /* ─── ALERTS ─── */
+  .alert {
+    position: fixed; top: 24px; right: 24px; z-index: 9999;
+    padding: 14px 18px; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: var(--shadow);
+    animation: slideIn 0.3s ease;
+    max-width: 360px;
+  }
+  .alert-success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86efac; }
+  .alert-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+  /* ─── PROPERTY CARDS ─── */
+  .properties-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+  .property-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .property-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .property-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .property-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, rgba(79,142,247,0.15), rgba(123,94,167,0.15));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    border: 1px solid rgba(79,142,247,0.15);
+  }
+  .property-name { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .property-location { font-size: 13px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+  .property-meta { display: flex; gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .property-meta-item { text-align: center; }
+  .property-meta-value { font-family: var(--font-head); font-size: 18px; font-weight: 700; }
+  .property-meta-label { font-size: 11px; color: var(--text2); }
+  .property-actions { display: flex; gap: 8px; }
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center; padding: 60px 24px;
+    color: var(--text2);
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-state h3 { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; margin-bottom: 24px; }
+  /* ─── SEARCH BAR ─── */
+  .search-bar {
+    position: relative; flex: 1; max-width: 320px;
+  }
+  .search-bar input { padding-left: 36px; background: var(--surface2); }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
+  /* ─── DIVIDER ─── */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  /* ─── SECTION HEAD ─── */
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .section-head h2 { font-family: var(--font-head); font-size: 18px; font-weight: 700; }
+  /* ─── CHART BAR ─── */
+  .chart-bar-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .chart-bar-row { display: flex; align-items: center; gap: 12px; }
+  .chart-bar-label { font-size: 13px; color: var(--text2); width: 80px; flex-shrink: 0; }
+  .chart-bar-track { flex: 1; height: 8px; background: var(--surface3); border-radius: 100px; overflow: hidden; }
+  .chart-bar-fill { height: 100%; border-radius: 100px; transition: width 0.5s ease; }
+  .chart-bar-value { font-size: 13px; font-weight: 600; width: 60px; text-align: right; }
+  /* ─── MOBILE TOGGLE ─── */
+  .mobile-menu-btn {
+    display: none; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px; cursor: pointer; font-size: 18px; color: var(--text);
+  }
+  .sidebar-overlay { display: none; }
+  /* ─── ANIMATIONS ─── */
+  @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+  /* ─── TABS ─── */
+  .tabs { display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: var(--radius-sm); margin-bottom: 24px; width: fit-content; }
+  .tab { padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text2); transition: all 0.2s; }
+  .tab.active { background: var(--surface); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  /* ─── AUTH LINK ─── */
+  .auth-link { font-size: 13px; color: var(--text2); margin-top: 20px; text-align: center; }
+  .auth-link a { color: var(--accent); cursor: pointer; font-weight: 500; }
+  .auth-link a:hover { text-decoration: underline; }
+  /* ─── PROGRESS ─── */
+  .progress-ring { width: 80px; height: 80px; }
+  /* ─── OCCUPANCY VISUAL ─── */
+  .occupancy-bar { height: 10px; border-radius: 100px; background: var(--surface3); overflow: hidden; margin-top: 8px; }
+  .occupancy-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent), var(--accent3)); transition: width 0.6s ease; }
+  /* ─── SUMMARY ROW ─── */
+  .summary-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row-label { font-size: 14px; color: var(--text2); display: flex; align-items: center; gap: 8px; }
+  .summary-row-value { font-size: 14px; font-weight: 600; }
+  /* ─── DETAIL VIEW ─── */
+  .detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .detail-icon { width: 56px; height: 56px; background: linear-gradient(135deg, rgba(79,142,247,0.15), rgba(123,94,167,0.15)); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 1px solid rgba(79,142,247,0.15); }
+  .detail-title { font-family: var(--font-head); font-size: 22px; font-weight: 700; }
+  .detail-subtitle { font-size: 14px; color: var(--text2); }
+  /* ─── 2-COL LAYOUT ─── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); box-shadow: 4px 0 32px rgba(0,0,0,0.5); }
+    .sidebar-overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    .main-content { margin-left: 0; }
+    .mobile-menu-btn { display: flex; }
+    .page-content { padding: 20px 16px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .properties-grid { grid-template-columns: 1fr; }
+    .two-col, .three-col { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .topbar { padding: 0 16px; }
+  }
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .auth-card { padding: 32px 24px; }
+    .modal { padding: 24px 20px; }
+  }
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+  /* ─── MISC ─── */
+  .gap-8 { gap: 8px; }
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .grid-info { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .info-box { background: var(--surface2); border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--border); }
+  .info-box-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .info-box-value { font-size: 15px; font-weight: 600; }
+  .text-green { color: var(--green); }
+  .text-red { color: var(--red); }
+  .text-gold { color: var(--gold); }
+  .text-accent { color: var(--accent); }
+  .text-sm { font-size: 13px; }
+  .text-xs { font-size: 12px; }
+  .text-muted { color: var(--text2); }
+  .fw-bold { font-weight: 700; }
+  .mb-4 { margin-bottom: 4px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-24 { margin-bottom: 24px; }
+  .mt-16 { margin-top: 16px; }
+  .no-underline { text-decoration: none; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+const { useState, useEffect, useCallback, useRef, createContext, useContext } = React;
+
+// ══════════════════════════════════════════════════
+// SIMULATED BACKEND (localStorage as MongoDB)
+// In production: replace with Axios calls to Express API
+// ══════════════════════════════════════════════════
+const DB = {
+  get: (col) => JSON.parse(localStorage.getItem('propflow_' + col) || '[]'),
+  set: (col, data) => localStorage.setItem('propflow_' + col, JSON.stringify(data)),
+  genId: () => Math.random().toString(36).slice(2) + Date.now().toString(36),
+  now: () => new Date().toISOString(),
+};
+
+// ── AUTH SERVICE ──
+const AuthService = {
+  register: (data) => {
+    const users = DB.get('users');
+    if (users.find(u => u.email === data.email)) throw new Error('Email already registered');
+    const user = { _id: DB.genId(), ...data, createdAt: DB.now() };
+    DB.set('users', [...users, user]);
+    const token = btoa(JSON.stringify({ _id: user._id, email: user.email, exp: Date.now() + 86400000 }));
+    return { user, token };
+  },
+  login: (email, password) => {
+    const users = DB.get('users');
+    const user = users.find(u => u.email === email && u.password === password);
+    if (!user) throw new Error('Invalid credentials');
+    const token = btoa(JSON.stringify({ _id: user._id, email: user.email, exp: Date.now() + 86400000 }));
+    return { user, token };
+  },
+  me: (token) => {
+    try {
+      const payload = JSON.parse(atob(token));
+      if (payload.exp < Date.now()) return null;
+      const users = DB.get('users');
+      return users.find(u => u._id === payload._id) || null;
+    } catch { return null; }
+  },
+};
+
+// ── PROPERTY SERVICE ──
+const PropertyService = {
+  getAll: () => DB.get('properties'),
+  create: (data) => {
+    const p = { _id: DB.genId(), ...data, createdAt: DB.now() };
+    DB.set('properties', [...DB.get('properties'), p]);
+    return p;
+  },
+  update: (id, data) => {
+    const arr = DB.get('properties').map(p => p._id === id ? { ...p, ...data } : p);
+    DB.set('properties', arr);
+    return arr.find(p => p._id === id);
+  },
+  delete: (id) => {
+    DB.set('properties', DB.get('properties').filter(p => p._id !== id));
+    DB.set('units', DB.get('units').filter(u => u.propertyId !== id));
+  },
+};
+
+// ── UNIT SERVICE ──
+const UnitService = {
+  getAll: () => DB.get('units'),
+  getByProperty: (pid) => DB.get('units').filter(u => u.propertyId === pid),
+  create: (data) => {
+    const u = { _id: DB.genId(), ...data, status: 'vacant', createdAt: DB.now() };
+    DB.set('units', [...DB.get('units'), u]);
+    return u;
+  },
+  update: (id, data) => {
+    const arr = DB.get('units').map(u => u._id === id ? { ...u, ...data } : u);
+    DB.set('units', arr);
+    return arr.find(u => u._id === id);
+  },
+  delete: (id) => DB.set('units', DB.get('units').filter(u => u._id !== id)),
+};
+
+// ── TENANT SERVICE ──
+const TenantService = {
+  getAll: () => DB.get('tenants'),
+  create: (data) => {
+    const t = { _id: DB.genId(), ...data, createdAt: DB.now() };
+    DB.set('tenants', [...DB.get('tenants'), t]);
+    if (data.unitId) UnitService.update(data.unitId, { status: 'occupied', tenantId: t._id });
+    return t;
+  },
+  update: (id, data) => {
+    const old = DB.get('tenants').find(t => t._id === id);
+    if (old.unitId && old.unitId !== data.unitId) UnitService.update(old.unitId, { status: 'vacant', tenantId: null });
+    if (data.unitId && data.unitId !== old.unitId) UnitService.update(data.unitId, { status: 'occupied', tenantId: id });
+    const arr = DB.get('tenants').map(t => t._id === id ? { ...t, ...data } : t);
+    DB.set('tenants', arr);
+    return arr.find(t => t._id === id);
+  },
+  delete: (id) => {
+    const t = DB.get('tenants').find(t => t._id === id);
+    if (t?.unitId) UnitService.update(t.unitId, { status: 'vacant', tenantId: null });
+    DB.set('tenants', DB.get('tenants').filter(t => t._id !== id));
+  },
+};
+
+// ── PAYMENT SERVICE ──
+const PaymentService = {
+  getAll: () => DB.get('payments'),
+  create: (data) => {
+    const p = { _id: DB.genId(), ...data, createdAt: DB.now() };
+    DB.set('payments', [...DB.get('payments'), p]);
+    return p;
+  },
+  update: (id, data) => {
+    const arr = DB.get('payments').map(p => p._id === id ? { ...p, ...data } : p);
+    DB.set('payments', arr);
+    return arr.find(p => p._id === id);
+  },
+  delete: (id) => DB.set('payments', DB.get('payments').filter(p => p._id !== id)),
+};
+
+// ══════════════════════════════════════════════════
+// CONTEXT
+// ══════════════════════════════════════════════════
+const AppCtx = createContext(null);
+const useApp = () => useContext(AppCtx);
+
+// ══════════════════════════════════════════════════
+// HOOKS
+// ══════════════════════════════════════════════════
+function useToast() {
+  const [toast, setToast] = useState(null);
+  const show = useCallback((msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  }, []);
+  return { toast, show };
+}
+
+// ══════════════════════════════════════════════════
+// SMALL COMPONENTS
+// ══════════════════════════════════════════════════
+function Toast({ toast }) {
+  if (!toast) return null;
+  return React.createElement('div', { className: `alert alert-${toast.type}` },
+    React.createElement('span', null, toast.type === 'success' ? '✓' : '✕'),
+    React.createElement('span', null, toast.msg)
+  );
+}
+
+function Modal({ open, onClose, title, subtitle, children, wide }) {
+  if (!open) return null;
+  return React.createElement('div', { className: 'modal-overlay', onClick: e => e.target === e.currentTarget && onClose() },
+    React.createElement('div', { className: `modal${wide ? ' modal-wide' : ''}` },
+      React.createElement('button', { className: 'modal-close', onClick: onClose }, '✕'),
+      React.createElement('h2', null, title),
+      subtitle && React.createElement('p', null, subtitle),
+      children
+    )
+  );
+}
+
+function Badge({ type, children }) {
+  return React.createElement('span', { className: `badge badge-${type}` },
+    React.createElement('span', { className: 'badge-dot' }),
+    children
+  );
+}
+
+function EmptyState({ icon, title, desc, action }) {
+  return React.createElement('div', { className: 'empty-state' },
+    React.createElement('div', { className: 'empty-icon' }, icon),
+    React.createElement('h3', null, title),
+    React.createElement('p', null, desc),
+    action
+  );
+}
+
+function ConfirmDelete({ open, onClose, onConfirm, name }) {
+  return React.createElement(Modal, { open, onClose, title: 'Confirm Delete', subtitle: `Are you sure you want to delete "${name}"? This action cannot be undone.` },
+    React.createElement('div', { className: 'modal-footer' },
+      React.createElement('button', { className: 'btn btn-secondary', onClick: onClose }, 'Cancel'),
+      React.createElement('button', { className: 'btn btn-danger', onClick: () => { onConfirm(); onClose(); } }, '🗑 Delete')
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════
+// AUTH PAGES
+// ══════════════════════════════════════════════════
+function AuthPage({ onAuth }) {
+  const [mode, setMode] = useState('login');
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'landlord' });
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const submit = async () => {
+    setErr(''); setLoading(true);
+    try {
+      let res;
+      if (mode === 'login') res = AuthService.login(form.email, form.password);
+      else res = AuthService.register(form);
+      localStorage.setItem('propflow_token', res.token);
+      onAuth(res.user);
+    } catch (e) { setErr(e.message); }
+    setLoading(false);
+  };
+
+  const Logo = () => React.createElement('div', { className: 'auth-logo' },
+    React.createElement('div', { className: 'auth-logo-icon' }, '🏠'),
+    React.createElement('span', null, 'PropFlow')
+  );
+
+  return React.createElement('div', { className: 'auth-wrap' },
+    React.createElement('div', { className: 'auth-card' },
+      React.createElement(Logo),
+      React.createElement('h1', null, mode === 'login' ? 'Welcome back' : 'Create account'),
+      React.createElement('p', null, mode === 'login' ? 'Sign in to manage your properties' : 'Start managing your rental properties'),
+      err && React.createElement('div', { className: 'alert alert-error', style: { position: 'relative', top: 0, right: 0, marginBottom: 16, animation: 'none' } },
+        React.createElement('span', null, '✕'), React.createElement('span', null, err)
+      ),
+      mode === 'register' && React.createElement('div', { className: 'form-row' },
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Full Name'),
+          React.createElement('input', { placeholder: 'John Smith', value: form.name, onChange: set('name') })
+        ),
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Role'),
+          React.createElement('select', { value: form.role, onChange: set('role') },
+            React.createElement('option', { value: 'landlord' }, 'Landlord'),
+            React.createElement('option', { value: 'manager' }, 'Property Manager')
+          )
+        )
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Email'),
+        React.createElement('input', { type: 'email', placeholder: 'you@email.com', value: form.email, onChange: set('email') })
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Password'),
+        React.createElement('input', { type: 'password', placeholder: '••••••••', value: form.password, onChange: set('password') })
+      ),
+      React.createElement('button', { className: 'btn btn-primary btn-full', onClick: submit, disabled: loading },
+        loading ? '...' : mode === 'login' ? '→ Sign In' : '→ Create Account'
+      ),
+      React.createElement('p', { className: 'auth-link' },
+        mode === 'login' ? "Don't have an account? " : "Already have an account? ",
+        React.createElement('a', { onClick: () => setMode(mode === 'login' ? 'register' : 'login') },
+          mode === 'login' ? 'Register' : 'Sign In'
+        )
+      )
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════════════════
+function Sidebar({ page, setPage, user, onLogout, open, onClose }) {
+  const nav = [
+    { id: 'dashboard', icon: '⊞', label: 'Dashboard' },
+    { id: 'properties', icon: '🏢', label: 'Properties' },
+    { id: 'units', icon: '🚪', label: 'Units' },
+    { id: 'tenants', icon: '👥', label: 'Tenants' },
+    { id: 'payments', icon: '💳', label: 'Payments' },
+    { id: 'reports', icon: '📊', label: 'Reports' },
+  ];
+  const initials = user?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
+
+  return React.createElement(React.Fragment, null,
+    open && React.createElement('div', { className: 'sidebar-overlay', onClick: onClose }),
+    React.createElement('aside', { className: `sidebar${open ? ' open' : ''}` },
+      React.createElement('div', { className: 'sidebar-logo' },
+        React.createElement('div', { className: 'sidebar-logo-icon' }, '🏠'),
+        React.createElement('span', null, 'PropFlow')
+      ),
+      React.createElement('nav', { className: 'sidebar-nav' },
+        React.createElement('div', { className: 'nav-section-label' }, 'Main Menu'),
+        nav.map(n =>
+          React.createElement('div', { key: n.id, className: `nav-item${page === n.id ? ' active' : ''}`, onClick: () => { setPage(n.id); onClose(); } },
+            React.createElement('span', { className: 'nav-icon' }, n.icon),
+            React.createElement('span', null, n.label)
+          )
+        )
+      ),
+      React.createElement('div', { className: 'sidebar-footer' },
+        React.createElement('div', { className: 'user-chip', onClick: onLogout },
+          React.createElement('div', { className: 'user-avatar' }, initials),
+          React.createElement('div', { className: 'user-info' },
+            React.createElement('div', { className: 'user-name' }, user?.name || 'User'),
+            React.createElement('div', { className: 'user-role' }, user?.role || 'landlord')
+          ),
+          React.createElement('span', { style: { color: 'var(--text3)', fontSize: 12 } }, '↩')
+        )
+      )
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════
+function Dashboard() {
+  const properties = PropertyService.getAll();
+  const units = UnitService.getAll();
+  const tenants = TenantService.getAll();
+  const payments = PaymentService.getAll();
+
+  const occupied = units.filter(u => u.status === 'occupied').length;
+  const vacant = units.length - occupied;
+  const paidPayments = payments.filter(p => p.status === 'paid');
+  const pendingPayments = payments.filter(p => p.status === 'pending');
+  const totalCollected = paidPayments.reduce((s, p) => s + Number(p.amount), 0);
+  const totalPending = pendingPayments.reduce((s, p) => s + Number(p.amount), 0);
+
+  const stats = [
+    { label: 'Properties', value: properties.length, icon: '🏢', color: 'blue' },
+    { label: 'Total Units', value: units.length, icon: '🚪', color: 'purple' },
+    { label: 'Occupied', value: occupied, icon: '✅', color: 'green' },
+    { label: 'Vacant', value: vacant, icon: '🔓', color: 'teal' },
+    { label: 'Rent Collected', value: `$${totalCollected.toLocaleString()}`, icon: '💰', color: 'gold' },
+    { label: 'Pending', value: `$${totalPending.toLocaleString()}`, icon: '⏳', color: 'red' },
+  ];
+
+  // Recent payments
+  const recentPayments = [...payments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+
+  // Tenants with unpaid rent
+  const unpaidTenants = tenants.filter(t => {
+    const tp = payments.filter(p => p.tenantId === t._id && p.status === 'pending');
+    return tp.length > 0;
+  });
+
+  return React.createElement('div', null,
+    React.createElement('div', { className: 'stats-grid' },
+      stats.map(s =>
+        React.createElement('div', { key: s.label, className: `stat-card ${s.color}` },
+          React.createElement('div', { className: `stat-icon ${s.color}` }, s.icon),
+          React.createElement('div', { className: 'stat-value' }, s.value),
+          React.createElement('div', { className: 'stat-label' }, s.label)
+        )
+      )
+    ),
+    React.createElement('div', { className: 'two-col' },
+      // Recent Payments
+      React.createElement('div', { className: 'card' },
+        React.createElement('div', { className: 'card-header' },
+          React.createElement('h3', { className: 'card-title' }, '🕐 Recent Payments'),
+        ),
+        recentPayments.length === 0
+          ? React.createElement('p', { className: 'text-muted text-sm' }, 'No payments recorded yet')
+          : React.createElement('div', null,
+              recentPayments.map(p => {
+                const tenant = tenants.find(t => t._id === p.tenantId);
+                return React.createElement('div', { key: p._id, className: 'summary-row' },
+                  React.createElement('div', { className: 'summary-row-label' },
+                    React.createElement('span', null, '👤'),
+                    React.createElement('div', null,
+                      React.createElement('div', { style: { fontWeight: 600, fontSize: 14 } }, tenant?.name || 'Unknown'),
+                      React.createElement('div', { className: 'text-xs text-muted' }, p.month + ' · ' + p.year)
+                    )
+                  ),
+                  React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
+                    React.createElement('span', { style: { fontWeight: 700 } }, `$${Number(p.amount).toLocaleString()}`),
+                    React.createElement(Badge, { type: p.status === 'paid' ? 'green' : 'red' }, p.status)
+                  )
+                );
+              })
+            )
+      ),
+      // Occupancy
+      React.createElement('div', { className: 'card' },
+        React.createElement('div', { className: 'card-header' },
+          React.createElement('h3', { className: 'card-title' }, '📈 Occupancy Overview')
+        ),
+        React.createElement('div', null,
+          units.length === 0
+            ? React.createElement('p', { className: 'text-muted text-sm' }, 'No units added yet')
+            : React.createElement('div', null,
+                React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 8 } },
+                  React.createElement('span', { className: 'text-sm text-muted' }, 'Occupancy Rate'),
+                  React.createElement('span', { style: { fontWeight: 700, color: 'var(--accent)' } },
+                    units.length ? `${Math.round(occupied/units.length*100)}%` : '0%'
+                  )
+                ),
+                React.createElement('div', { className: 'occupancy-bar' },
+                  React.createElement('div', { className: 'occupancy-fill', style: { width: units.length ? `${occupied/units.length*100}%` : '0%' } })
+                ),
+                React.createElement('div', { className: 'grid-info', style: { marginTop: 20 } },
+                  [['Occupied', occupied, 'text-green'], ['Vacant', vacant, 'text-gold'], ['Tenants', tenants.length, 'text-accent']].map(([l, v, c]) =>
+                    React.createElement('div', { key: l, className: 'info-box' },
+                      React.createElement('div', { className: 'info-box-label' }, l),
+                      React.createElement('div', { className: `info-box-value ${c}` }, v)
+                    )
+                  )
+                ),
+                unpaidTenants.length > 0 && React.createElement('div', { style: { marginTop: 16, padding: '12px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 10 } },
+                  React.createElement('div', { style: { fontSize: 13, color: 'var(--red)', fontWeight: 600, marginBottom: 4 } }, `⚠️ ${unpaidTenants.length} tenant(s) have unpaid rent`),
+                  React.createElement('div', { className: 'text-xs text-muted' }, unpaidTenants.slice(0, 3).map(t => t.name).join(', ') + (unpaidTenants.length > 3 ? '...' : ''))
+                )
+              )
+        )
+      )
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════
+// PROPERTIES PAGE
+// ══════════════════════════════════════════════════
+function PropertiesPage() {
+  const { showToast } = useApp();
+  const [properties, setProperties] = useState(PropertyService.getAll());
+  const [search, setSearch] = useState('');
+  const [modal, setModal] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [delConfirm, setDelConfirm] = useState(null);
+  const [form, setForm] = useState({ name: '', location: '', units: '', description: '' });
+
+  const refresh = () => setProperties(PropertyService.getAll());
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const openAdd = () => { setEditItem(null); setForm({ name: '', location: '', units: '', description: '' }); setModal(true); };
+  const openEdit = (p) => { setEditItem(p); setForm({ name: p.name, location: p.location, units: p.units, description: p.description }); setModal(true); };
+
+  const save = () => {
+    if (!form.name || !form.location) return showToast('Name and location required', 'error');
+    if (editItem) { PropertyService.update(editItem._id, form); showToast('Property updated'); }
+    else { PropertyService.create(form); showToast('Property added'); }
+    setModal(false); refresh();
+  };
+
+  const filtered = properties.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.location.toLowerCase().includes(search.toLowerCase()));
+  const units = UnitService.getAll();
+
+  return React.createElement('div', null,
+    React.createElement('div', { className: 'section-head' },
+      React.createElement('h2', null, `Properties (${properties.length})`),
+      React.createElement('div', { className: 'flex gap-8' },
+        React.createElement('div', { className: 'search-bar' },
+          React.createElement('span', { className: 'search-icon' }, '🔍'),
+          React.createElement('input', { placeholder: 'Search...', value: search, onChange: e => setSearch(e.target.value) })
+        ),
+        React.createElement('button', { className: 'btn btn-primary', onClick: openAdd }, '+ Add Property')
+      )
+    ),
+    filtered.length === 0
+      ? React.createElement(EmptyState, { icon: '🏢', title: 'No properties yet', desc: 'Add your first property to get started', action: React.createElement('button', { className: 'btn btn-primary', onClick: openAdd }, '+ Add Property') })
+      : React.createElement('div', { className: 'properties-grid' },
+          filtered.map(p => {
+            const propUnits = units.filter(u => u.propertyId === p._id);
+            const occupied = propUnits.filter(u => u.status === 'occupied').length;
+            return React.createElement('div', { key: p._id, className: 'property-card' },
+              React.createElement('div', { className: 'property-card-header' },
+                React.createElement('div', { className: 'property-icon' }, '🏢'),
+                React.createElement('div', { className: 'property-actions' },
+                  React.createElement('button', { className: 'btn btn-sm btn-secondary btn-icon', onClick: () => openEdit(p) }, '✏️'),
+                  React.createElement('button', { className: 'btn btn-sm btn-danger btn-icon', onClick: () => setDelConfirm(p) }, '🗑')
+                )
+              ),
+              React.createElement('div', { className: 'property-name' }, p.name),
+              React.createElement('div', { className: 'property-location' }, '📍 ', p.location),
+              p.description && React.createElement('div', { className: 'text-sm text-muted', style: { marginTop: 8 } }, p.description),
+              React.createElement('div', { className: 'property-meta' },
+                React.createElement('div', { className: 'property-meta-item' },
+                  React.createElement('div', { className: 'property-meta-value' }, p.units || '—'),
+                  React.createElement('div', { className: 'property-meta-label' }, 'Total Units')
+                ),
+                React.createElement('div', { className: 'property-meta-item' },
+                  React.createElement('div', { className: 'property-meta-value text-green' }, occupied),
+                  React.createElement('div', { className: 'property-meta-label' }, 'Occupied')
+                ),
+                React.createElement('div', { className: 'property-meta-item' },
+                  React.createElement('div', { className: 'property-meta-value text-gold' }, propUnits.length - occupied),
+                  React.createElement('div', { className: 'property-meta-label' }, 'Vacant')
+                )
+              )
+            );
+          })
+        ),
+    React.createElement(Modal, { open: modal, onClose: () => setModal(false), title: editItem ? 'Edit Property' : 'Add Property', subtitle: 'Fill in the property details below' },
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Property Name *'),
+        React.createElement('input', { placeholder: 'Sunrise Apartments', value: form.name, onChange: set('name') })
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Location *'),
+        React.createElement('input', { placeholder: '123 Main St, City, State', value: form.location, onChange: set('location') })
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Number of Units'),
+        React.createElement('input', { type: 'number', placeholder: '12', value: form.units, onChange: set('units') })
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Description'),
+        React.createElement('textarea', { placeholder: 'Brief property description...', value: form.description, onChange: set('description') })
+      ),
+      React.createElement('div', { className: 'modal-footer' },
+        React.createElement('button', { className: 'btn btn-secondary', onClick: () => setModal(false) }, 'Cancel'),
+        React.createElement('button', { className: 'btn btn-primary', onClick: save }, editItem ? 'Save Changes' : 'Add Property')
+      )
+    ),
+    React.createElement(ConfirmDelete, { open: !!delConfirm, onClose: () => setDelConfirm(null), name: delConfirm?.name, onConfirm: () => { PropertyService.delete(delConfirm._id); showToast('Property deleted'); refresh(); } })
+  );
+}
+
+// ══════════════════════════════════════════════════
+// UNITS PAGE
+// ══════════════════════════════════════════════════
+function UnitsPage() {
+  const { showToast } = useApp();
+  const [units, setUnits] = useState(UnitService.getAll());
+  const [properties] = useState(PropertyService.getAll());
+  const [modal, setModal] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [delConfirm, setDelConfirm] = useState(null);
+  const [filter, setFilter] = useState('all');
+  const [form, setForm] = useState({ name: '', propertyId: '', rent: '', description: '', status: 'vacant' });
+
+  const refresh = () => setUnits(UnitService.getAll());
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const openAdd = () => { setEditItem(null); setForm({ name: '', propertyId: properties[0]?._id || '', rent: '', description: '', status: 'vacant' }); setModal(true); };
+  const openEdit = (u) => { setEditItem(u); setForm({ name: u.name, propertyId: u.propertyId, rent: u.rent, description: u.description || '', status: u.status }); setModal(true); };
+
+  const save = () => {
+    if (!form.name || !form.propertyId) return showToast('Unit name and property required', 'error');
+    if (editItem) { UnitService.update(editItem._id, form); showToast('Unit updated'); }
+    else { UnitService.create(form); showToast('Unit added'); }
+    setModal(false); refresh();
+  };
+
+  const tenants = TenantService.getAll();
+  const filtered = units.filter(u => filter === 'all' || u.status === filter);
+
+  const getPropName = id => properties.find(p => p._id === id)?.name || '—';
+  const getTenantName = id => tenants.find(t => t.unitId === id)?.name || '—';
+
+  return React.createElement('div', null,
+    React.createElement('div', { className: 'section-head' },
+      React.createElement('h2', null, `Units (${units.length})`),
+      React.createElement('div', { className: 'flex gap-8' },
+        properties.length > 0 && React.createElement('button', { className: 'btn btn-primary', onClick: openAdd }, '+ Add Unit')
+      )
+    ),
+    properties.length === 0
+      ? React.createElement('div', { className: 'card' }, React.createElement('p', { className: 'text-muted text-sm' }, '⚠️ Add a property first before adding units.'))
+      : React.createElement('div', null,
+          React.createElement('div', { className: 'tabs' },
+            ['all', 'occupied', 'vacant'].map(t =>
+              React.createElement('div', { key: t, className: `tab${filter === t ? ' active' : ''}`, onClick: () => setFilter(t) },
+                t.charAt(0).toUpperCase() + t.slice(1), ' (', (t === 'all' ? units : units.filter(u => u.status === t)).length, ')'
+              )
+            )
+          ),
+          filtered.length === 0
+            ? React.createElement(EmptyState, { icon: '🚪', title: 'No units found', desc: 'Add units to manage them here', action: React.createElement('button', { className: 'btn btn-primary', onClick: openAdd }, '+ Add Unit') })
+            : React.createElement('div', { className: 'table-wrap' },
+                React.createElement('table', null,
+                  React.createElement('thead', null,
+                    React.createElement('tr', null,
+                      ['Unit', 'Property', 'Rent/mo', 'Status', 'Tenant', 'Actions'].map(h =>
+                        React.createElement('th', { key: h }, h)
+                      )
+                    )
+                  ),
+                  React.createElement('tbody', null,
+                    filtered.map(u =>
+                      React.createElement('tr', { key: u._id },
+                        React.createElement('td', null, React.createElement('span', { style: { fontWeight: 600 } }, u.name)),
+                        React.createElement('td', null, React.createElement('span', { className: 'text-muted' }, getPropName(u.propertyId))),
+                        React.createElement('td', null, u.rent ? React.createElement('span', { className: 'text-green fw-bold' }, `$${Number(u.rent).toLocaleString()}`) : '—'),
+                        React.createElement('td', null, React.createElement(Badge, { type: u.status === 'occupied' ? 'green' : 'gold' }, u.status)),
+                        React.createElement('td', null, u.status === 'occupied' ? getTenantName(u._id) : React.createElement('span', { className: 'text-muted' }, '—')),
+                        React.createElement('td', null,
+                          React.createElement('div', { className: 'flex gap-8' },
+                            React.createElement('button', { className: 'btn btn-sm btn-secondary', onClick: () => openEdit(u) }, '✏️'),
+                            React.createElement('button', { className: 'btn btn-sm btn-danger', onClick: () => setDelConfirm(u) }, '🗑')
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+        ),
+    React.createElement(Modal, { open: modal, onClose: () => setModal(false), title: editItem ? 'Edit Unit' : 'Add Unit' },
+      React.createElement('div', { className: 'form-row' },
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Unit Name *'),
+          React.createElement('input', { placeholder: 'Unit 101', value: form.name, onChange: set('name') })
+        ),
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Property *'),
+          React.createElement('select', { value: form.propertyId, onChange: set('propertyId') },
+            properties.map(p => React.createElement('option', { key: p._id, value: p._id }, p.name))
+          )
+        )
+      ),
+      React.createElement('div', { className: 'form-row' },
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Monthly Rent ($)'),
+          React.createElement('input', { type: 'number', placeholder: '1500', value: form.rent, onChange: set('rent') })
+        ),
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Status'),
+          React.createElement('select', { value: form.status, onChange: set('status') },
+            React.createElement('option', { value: 'vacant' }, 'Vacant'),
+            React.createElement('option', { value: 'occupied' }, 'Occupied')
+          )
+        )
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Description'),
+        React.createElement('input', { placeholder: '2 bed, 1 bath...', value: form.description, onChange: set('description') })
+      ),
+      React.createElement('div', { className: 'modal-footer' },
+        React.createElement('button', { className: 'btn btn-secondary', onClick: () => setModal(false) }, 'Cancel'),
+        React.createElement('button', { className: 'btn btn-primary', onClick: save }, editItem ? 'Save Changes' : 'Add Unit')
+      )
+    ),
+    React.createElement(ConfirmDelete, { open: !!delConfirm, onClose: () => setDelConfirm(null), name: delConfirm?.name, onConfirm: () => { UnitService.delete(delConfirm._id); showToast('Unit deleted'); refresh(); } })
+  );
+}
+
+// ══════════════════════════════════════════════════
+// TENANTS PAGE
+// ══════════════════════════════════════════════════
+function TenantsPage() {
+  const { showToast } = useApp();
+  const [tenants, setTenants] = useState(TenantService.getAll());
+  const [units] = useState(UnitService.getAll());
+  const [properties] = useState(PropertyService.getAll());
+  const [modal, setModal] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [delConfirm, setDelConfirm] = useState(null);
+  const [search, setSearch] = useState('');
+  const [form, setForm] = useState({ name: '', email: '', phone: '', unitId: '', moveInDate: '', notes: '' });
+
+  const refresh = () => setTenants(TenantService.getAll());
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const vacantUnits = units.filter(u => u.status === 'vacant');
+  const allAvailableUnits = editItem ? [...vacantUnits, units.find(u => u._id === editItem.unitId)].filter(Boolean) : vacantUnits;
+
+  const openAdd = () => { setEditItem(null); setForm({ name: '', email: '', phone: '', unitId: '', moveInDate: '', notes: '' }); setModal(true); };
+  const openEdit = (t) => { setEditItem(t); setForm({ name: t.name, email: t.email, phone: t.phone, unitId: t.unitId || '', moveInDate: t.moveInDate || '', notes: t.notes || '' }); setModal(true); };
+
+  const save = () => {
+    if (!form.name || !form.email) return showToast('Name and email required', 'error');
+    if (editItem) { TenantService.update(editItem._id, form); showToast('Tenant updated'); }
+    else { TenantService.create(form); showToast('Tenant registered'); }
+    setModal(false); refresh();
+  };
+
+  const getUnitName = id => {
+    const u = units.find(u => u._id === id);
+    const p = properties.find(p => p._id === u?.propertyId);
+    return u ? `${p?.name || ''} – ${u.name}` : '—';
+  };
+
+  const filtered = tenants.filter(t => t.name.toLowerCase().includes(search.toLowerCase()) || t.email.toLowerCase().includes(search.toLowerCase()));
+
+  return React.createElement('div', null,
+    React.createElement('div', { className: 'section-head' },
+      React.createElement('h2', null, `Tenants (${tenants.length})`),
+      React.createElement('div', { className: 'flex gap-8' },
+        React.createElement('div', { className: 'search-bar' },
+          React.createElement('span', { className: 'search-icon' }, '🔍'),
+          React.createElement('input', { placeholder: 'Search tenants...', value: search, onChange: e => setSearch(e.target.value) })
+        ),
+        React.createElement('button', { className: 'btn btn-primary', onClick: openAdd }, '+ Add Tenant')
+      )
+    ),
+    filtered.length === 0
+      ? React.createElement(EmptyState, { icon: '👥', title: 'No tenants yet', desc: 'Register your first tenant', action: React.createElement('button', { className: 'btn btn-primary', onClick: openAdd }, '+ Add Tenant') })
+      : React.createElement('div', { className: 'table-wrap' },
+          React.createElement('table', null,
+            React.createElement('thead', null,
+              React.createElement('tr', null,
+                ['Name', 'Email', 'Phone', 'Unit', 'Move-in Date', 'Actions'].map(h =>
+                  React.createElement('th', { key: h }, h)
+                )
+              )
+            ),
+            React.createElement('tbody', null,
+              filtered.map(t =>
+                React.createElement('tr', { key: t._id },
+                  React.createElement('td', null,
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
+                      React.createElement('div', { style: { width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0 } },
+                        t.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+                      ),
+                      React.createElement('span', { style: { fontWeight: 600 } }, t.name)
+                    )
+                  ),
+                  React.createElement('td', null, React.createElement('span', { className: 'text-muted' }, t.email)),
+                  React.createElement('td', null, t.phone || '—'),
+                  React.createElement('td', null, t.unitId ? React.createElement('span', { className: 'text-sm' }, getUnitName(t.unitId)) : React.createElement(Badge, { type: 'gold' }, 'Unassigned')),
+                  React.createElement('td', null, t.moveInDate ? new Date(t.moveInDate).toLocaleDateString() : '—'),
+                  React.createElement('td', null,
+                    React.createElement('div', { className: 'flex gap-8' },
+                      React.createElement('button', { className: 'btn btn-sm btn-secondary', onClick: () => openEdit(t) }, '✏️'),
+                      React.createElement('button', { className: 'btn btn-sm btn-danger', onClick: () => setDelConfirm(t) }, '🗑')
+                    )
+                  )
+                )
+              )
+            )
+          )
+        ),
+    React.createElement(Modal, { open: modal, onClose: () => setModal(false), title: editItem ? 'Edit Tenant' : 'Register Tenant', wide: true },
+      React.createElement('div', { className: 'form-row' },
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Full Name *'),
+          React.createElement('input', { placeholder: 'Jane Doe', value: form.name, onChange: set('name') })
+        ),
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Email *'),
+          React.createElement('input', { type: 'email', placeholder: 'jane@email.com', value: form.email, onChange: set('email') })
+        )
+      ),
+      React.createElement('div', { className: 'form-row' },
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Phone Number'),
+          React.createElement('input', { placeholder: '+1 555 000 0000', value: form.phone, onChange: set('phone') })
+        ),
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Move-in Date'),
+          React.createElement('input', { type: 'date', value: form.moveInDate, onChange: set('moveInDate') })
+        )
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Assign to Unit'),
+        React.createElement('select', { value: form.unitId, onChange: set('unitId') },
+          React.createElement('option', { value: '' }, '— Select Unit (Optional) —'),
+          allAvailableUnits.map(u => {
+            const p = properties.find(p => p._id === u.propertyId);
+            return React.createElement('option', { key: u._id, value: u._id }, `${p?.name || ''} – ${u.name}${u.rent ? ` ($${u.rent}/mo)` : ''}`);
+          })
+        )
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Notes'),
+        React.createElement('textarea', { placeholder: 'Any additional notes...', value: form.notes, onChange: set('notes') })
+      ),
+      React.createElement('div', { className: 'modal-footer' },
+        React.createElement('button', { className: 'btn btn-secondary', onClick: () => setModal(false) }, 'Cancel'),
+        React.createElement('button', { className: 'btn btn-primary', onClick: save }, editItem ? 'Save Changes' : 'Register Tenant')
+      )
+    ),
+    React.createElement(ConfirmDelete, { open: !!delConfirm, onClose: () => setDelConfirm(null), name: delConfirm?.name, onConfirm: () => { TenantService.delete(delConfirm._id); showToast('Tenant removed'); refresh(); } })
+  );
+}
+
+// ══════════════════════════════════════════════════
+// PAYMENTS PAGE
+// ══════════════════════════════════════════════════
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function PaymentsPage() {
+  const { showToast } = useApp();
+  const [payments, setPayments] = useState(PaymentService.getAll());
+  const [tenants] = useState(TenantService.getAll());
+  const [units] = useState(UnitService.getAll());
+  const [modal, setModal] = useState(false);
+  const [delConfirm, setDelConfirm] = useState(null);
+  const [filter, setFilter] = useState('all');
+  const cy = new Date().getFullYear();
+  const [form, setForm] = useState({ tenantId: '', amount: '', month: MONTHS[new Date().getMonth()], year: String(cy), status: 'pending', note: '' });
+
+  const refresh = () => setPayments(PaymentService.getAll());
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const save = () => {
+    if (!form.tenantId || !form.amount) return showToast('Tenant and amount required', 'error');
+    PaymentService.create(form); showToast('Payment recorded'); setModal(false); refresh();
+  };
+
+  const markPaid = (p) => { PaymentService.update(p._id, { status: 'paid' }); showToast('Marked as paid'); refresh(); };
+
+  const getTenantName = id => tenants.find(t => t._id === id)?.name || '—';
+  const getTenantUnit = (tid) => {
+    const t = tenants.find(t => t._id === tid);
+    return units.find(u => u._id === t?.unitId)?.name || '—';
+  };
+
+  const filtered = payments.filter(p => filter === 'all' || p.status === filter);
+  const totalPaid = payments.filter(p => p.status === 'paid').reduce((s, p) => s + Number(p.amount), 0);
+  const totalPending = payments.filter(p => p.status === 'pending').reduce((s, p) => s + Number(p.amount), 0);
+
+  return React.createElement('div', null,
+    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 24 } },
+      [['💰 Total Collected', `$${totalPaid.toLocaleString()}`, 'text-green'], ['⏳ Pending', `$${totalPending.toLocaleString()}`, 'text-red'], ['📋 Total Records', payments.length, 'text-accent']].map(([l, v, c]) =>
+        React.createElement('div', { key: l, className: 'card', style: { padding: '18px 22px' } },
+          React.createElement('div', { className: 'text-sm text-muted', style: { marginBottom: 6 } }, l),
+          React.createElement('div', { className: `stat-value ${c}`, style: { fontSize: 22 } }, v)
+        )
+      )
+    ),
+    React.createElement('div', { className: 'section-head' },
+      React.createElement('div', { className: 'tabs', style: { marginBottom: 0 } },
+        ['all', 'paid', 'pending'].map(t =>
+          React.createElement('div', { key: t, className: `tab${filter === t ? ' active' : ''}`, onClick: () => setFilter(t) },
+            t.charAt(0).toUpperCase() + t.slice(1)
+          )
+        )
+      ),
+      React.createElement('button', { className: 'btn btn-primary', onClick: () => setModal(true) }, '+ Record Payment')
+    ),
+    React.createElement('div', { style: { marginTop: 16 } },
+      filtered.length === 0
+        ? React.createElement(EmptyState, { icon: '💳', title: 'No payments yet', desc: 'Record your first rent payment', action: React.createElement('button', { className: 'btn btn-primary', onClick: () => setModal(true) }, '+ Record Payment') })
+        : React.createElement('div', { className: 'table-wrap' },
+            React.createElement('table', null,
+              React.createElement('thead', null,
+                React.createElement('tr', null,
+                  ['Tenant', 'Unit', 'Amount', 'Month/Year', 'Status', 'Note', 'Actions'].map(h => React.createElement('th', { key: h }, h))
+                )
+              ),
+              React.createElement('tbody', null,
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(p =>
+                  React.createElement('tr', { key: p._id },
+                    React.createElement('td', null, React.createElement('span', { style: { fontWeight: 600 } }, getTenantName(p.tenantId))),
+                    React.createElement('td', null, React.createElement('span', { className: 'text-muted' }, getTenantUnit(p.tenantId))),
+                    React.createElement('td', null, React.createElement('span', { className: 'fw-bold text-green' }, `$${Number(p.amount).toLocaleString()}`)),
+                    React.createElement('td', null, `${p.month} ${p.year}`),
+                    React.createElement('td', null, React.createElement(Badge, { type: p.status === 'paid' ? 'green' : 'red' }, p.status)),
+                    React.createElement('td', null, React.createElement('span', { className: 'text-muted text-sm' }, p.note || '—')),
+                    React.createElement('td', null,
+                      React.createElement('div', { className: 'flex gap-8' },
+                        p.status === 'pending' && React.createElement('button', { className: 'btn btn-sm btn-success', onClick: () => markPaid(p) }, '✓ Paid'),
+                        React.createElement('button', { className: 'btn btn-sm btn-danger', onClick: () => setDelConfirm(p) }, '🗑')
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+    ),
+    React.createElement(Modal, { open: modal, onClose: () => setModal(false), title: 'Record Payment', subtitle: 'Log a rent payment for a tenant' },
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Tenant *'),
+        React.createElement('select', { value: form.tenantId, onChange: set('tenantId') },
+          React.createElement('option', { value: '' }, '— Select Tenant —'),
+          tenants.map(t => React.createElement('option', { key: t._id, value: t._id }, t.name))
+        )
+      ),
+      React.createElement('div', { className: 'form-row' },
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Amount ($) *'),
+          React.createElement('input', { type: 'number', placeholder: '1500', value: form.amount, onChange: set('amount') })
+        ),
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Status'),
+          React.createElement('select', { value: form.status, onChange: set('status') },
+            React.createElement('option', { value: 'pending' }, 'Pending'),
+            React.createElement('option', { value: 'paid' }, 'Paid')
+          )
+        )
+      ),
+      React.createElement('div', { className: 'form-row' },
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Month'),
+          React.createElement('select', { value: form.month, onChange: set('month') },
+            MONTHS.map(m => React.createElement('option', { key: m, value: m }, m))
+          )
+        ),
+        React.createElement('div', { className: 'form-group' },
+          React.createElement('label', null, 'Year'),
+          React.createElement('input', { type: 'number', value: form.year, onChange: set('year') })
+        )
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', null, 'Note'),
+        React.createElement('input', { placeholder: 'Optional note...', value: form.note, onChange: set('note') })
+      ),
+      React.createElement('div', { className: 'modal-footer' },
+        React.createElement('button', { className: 'btn btn-secondary', onClick: () => setModal(false) }, 'Cancel'),
+        React.createElement('button', { className: 'btn btn-primary', onClick: save }, 'Record Payment')
+      )
+    ),
+    React.createElement(ConfirmDelete, { open: !!delConfirm, onClose: () => setDelConfirm(null), name: `payment of $${delConfirm?.amount}`, onConfirm: () => { PaymentService.delete(delConfirm._id); showToast('Payment deleted'); refresh(); } })
+  );
+}
+
+// ══════════════════════════════════════════════════
+// REPORTS PAGE
+// ══════════════════════════════════════════════════
+function ReportsPage() {
+  const payments = PaymentService.getAll();
+  const tenants = TenantService.getAll();
+  const units = UnitService.getAll();
+  const properties = PropertyService.getAll();
+
+  // Monthly income by month
+  const monthlyData = {};
+  payments.filter(p => p.status === 'paid').forEach(p => {
+    const key = `${p.month} ${p.year}`;
+    monthlyData[key] = (monthlyData[key] || 0) + Number(p.amount);
+  });
+  const monthlyEntries = Object.entries(monthlyData).sort((a, b) => new Date('1 ' + b[0]) - new Date('1 ' + a[0])).slice(0, 6).reverse();
+  const maxMonthly = Math.max(...monthlyEntries.map(e => e[1]), 1);
+
+  // Tenants with unpaid rent
+  const unpaidTenants = tenants.filter(t => {
+    return payments.some(p => p.tenantId === t._id && p.status === 'pending');
+  }).map(t => {
+    const pending = payments.filter(p => p.tenantId === t._id && p.status === 'pending');
+    const total = pending.reduce((s, p) => s + Number(p.amount), 0);
+    const unit = units.find(u => u._id === t.unitId);
+    const prop = properties.find(p => p._id === unit?.propertyId);
+    return { ...t, pendingCount: pending.length, pendingTotal: total, unitName: unit?.name, propName: prop?.name };
+  });
+
+  // Property stats
+  const propStats = properties.map(p => {
+    const propUnits = units.filter(u => u.propertyId === p._id);
+    const occ = propUnits.filter(u => u.status === 'occupied').length;
+    const rate = propUnits.length ? Math.round(occ / propUnits.length * 100) : 0;
+    const income = payments.filter(pay => {
+      const t = tenants.find(t => t._id === pay.tenantId);
+      return t && propUnits.some(u => u._id === t.unitId) && pay.status === 'paid';
+    }).reduce((s, p) => s + Number(p.amount), 0);
+    return { ...p, unitCount: propUnits.length, occupied: occ, rate, income };
+  });
+
+  return React.createElement('div', null,
+    React.createElement('h2', { style: { fontFamily: 'var(--font-head)', fontSize: 18, fontWeight: 700, marginBottom: 24 } }, '📊 Analytics & Reports'),
+    React.createElement('div', { className: 'two-col', style: { marginBottom: 20 } },
+      // Monthly Income Chart
+      React.createElement('div', { className: 'card' },
+        React.createElement('div', { className: 'card-header' }, React.createElement('h3', { className: 'card-title' }, '📈 Monthly Income')),
+        monthlyEntries.length === 0
+          ? React.createElement('p', { className: 'text-muted text-sm' }, 'No paid payments yet')
+          : React.createElement('div', { className: 'chart-bar-wrap' },
+              monthlyEntries.map(([month, val]) =>
+                React.createElement('div', { key: month, className: 'chart-bar-row' },
+                  React.createElement('span', { className: 'chart-bar-label', style: { fontSize: 12 } }, month),
+                  React.createElement('div', { className: 'chart-bar-track' },
+                    React.createElement('div', { className: 'chart-bar-fill', style: { width: `${val / maxMonthly * 100}%`, background: 'linear-gradient(90deg, var(--accent), var(--accent3))' } })
+                  ),
+                  React.createElement('span', { className: 'chart-bar-value', style: { fontSize: 12, color: 'var(--green)' } }, `$${val.toLocaleString()}`)
+                )
+              )
+            )
+      ),
+      // Property Occupancy
+      React.createElement('div', { className: 'card' },
+        React.createElement('div', { className: 'card-header' }, React.createElement('h3', { className: 'card-title' }, '🏢 Property Occupancy')),
+        propStats.length === 0
+          ? React.createElement('p', { className: 'text-muted text-sm' }, 'No properties yet')
+          : React.createElement('div', { className: 'chart-bar-wrap' },
+              propStats.map(p =>
+                React.createElement('div', { key: p._id, className: 'chart-bar-row' },
+                  React.createElement('span', { className: 'chart-bar-label', style: { fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, p.name),
+                  React.createElement('div', { className: 'chart-bar-track' },
+                    React.createElement('div', { className: 'chart-bar-fill', style: { width: `${p.rate}%`, background: 'linear-gradient(90deg, var(--accent2), var(--accent))' } })
+                  ),
+                  React.createElement('span', { className: 'chart-bar-value', style: { fontSize: 12 } }, `${p.rate}%`)
+                )
+              )
+            )
+      )
+    ),
+    // Unpaid Tenants
+    React.createElement('div', { className: 'card' },
+      React.createElement('div', { className: 'card-header' },
+        React.createElement('h3', { className: 'card-title' }, `⚠️ Tenants with Unpaid Rent (${unpaidTenants.length})`),
+      ),
+      unpaidTenants.length === 0
+        ? React.createElement('div', { style: { padding: '20px', textAlign: 'center' } },
+            React.createElement('span', { style: { fontSize: 28 } }, '🎉'),
+            React.createElement('p', { className: 'text-muted', style: { marginTop: 8 } }, 'All tenants are up to date!')
+          )
+        : React.createElement('div', { className: 'table-wrap' },
+            React.createElement('table', null,
+              React.createElement('thead', null,
+                React.createElement('tr', null,
+                  ['Tenant', 'Property / Unit', 'Pending Payments', 'Total Owed'].map(h => React.createElement('th', { key: h }, h))
+                )
+              ),
+              React.createElement('tbody', null,
+                unpaidTenants.map(t =>
+                  React.createElement('tr', { key: t._id },
+                    React.createElement('td', null, React.createElement('span', { style: { fontWeight: 600 } }, t.name)),
+                    React.createElement('td', null, `${t.propName || '—'} ${t.unitName ? '– ' + t.unitName : ''}`),
+                    React.createElement('td', null, React.createElement(Badge, { type: 'red' }, `${t.pendingCount} payment${t.pendingCount > 1 ? 's' : ''}`)),
+                    React.createElement('td', null, React.createElement('span', { className: 'fw-bold text-red' }, `$${t.pendingTotal.toLocaleString()}`))
+                  )
+                )
+              )
+            )
+          )
+    ),
+    // Property Summary
+    React.createElement('div', { className: 'card', style: { marginTop: 20 } },
+      React.createElement('div', { className: 'card-header' }, React.createElement('h3', { className: 'card-title' }, '📋 Property Revenue Summary')),
+      propStats.length === 0
+        ? React.createElement('p', { className: 'text-muted text-sm' }, 'No properties yet')
+        : React.createElement('div', { className: 'table-wrap' },
+            React.createElement('table', null,
+              React.createElement('thead', null,
+                React.createElement('tr', null,
+                  ['Property', 'Location', 'Units', 'Occupancy', 'Total Income'].map(h => React.createElement('th', { key: h }, h))
+                )
+              ),
+              React.createElement('tbody', null,
+                propStats.map(p =>
+                  React.createElement('tr', { key: p._id },
+                    React.createElement('td', null, React.createElement('span', { style: { fontWeight: 600 } }, p.name)),
+                    React.createElement('td', null, React.createElement('span', { className: 'text-muted' }, p.location)),
+                    React.createElement('td', null, `${p.occupied}/${p.unitCount}`),
+                    React.createElement('td', null,
+                      React.createElement('div', null,
+                        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12 } },
+                          React.createElement('span', null, `${p.rate}%`)
+                        ),
+                        React.createElement('div', { className: 'occupancy-bar', style: { height: 6, width: 80 } },
+                          React.createElement('div', { className: 'occupancy-fill', style: { width: `${p.rate}%` } })
+                        )
+                      )
+                    ),
+                    React.createElement('td', null, React.createElement('span', { className: 'fw-bold text-green' }, `$${p.income.toLocaleString()}`))
+                  )
+                )
+              )
+            )
+          )
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════
+// MAIN APP
+// ══════════════════════════════════════════════════
+function App() {
+  const [user, setUser] = useState(null);
+  const [page, setPage] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { toast, show: showToast } = useToast();
+
+  useEffect(() => {
+    const token = localStorage.getItem('propflow_token');
+    if (token) {
+      const u = AuthService.me(token);
+      if (u) setUser(u);
+    }
+  }, []);
+
+  const logout = () => {
+    localStorage.removeItem('propflow_token');
+    setUser(null);
+    setPage('dashboard');
+  };
+
+  if (!user) return React.createElement(AppCtx.Provider, { value: { showToast } },
+    React.createElement(Toast, { toast }),
+    React.createElement(AuthPage, { onAuth: setUser })
+  );
+
+  const pageTitle = { dashboard: '⊞ Dashboard', properties: '🏢 Properties', units: '🚪 Units', tenants: '👥 Tenants', payments: '💳 Payments', reports: '📊 Reports' };
+
+  return React.createElement(AppCtx.Provider, { value: { showToast } },
+    React.createElement(Toast, { toast }),
+    React.createElement('div', { className: 'app-layout' },
+      React.createElement(Sidebar, { page, setPage, user, onLogout: logout, open: sidebarOpen, onClose: () => setSidebarOpen(false) }),
+      React.createElement('div', { className: 'main-content' },
+        React.createElement('div', { className: 'topbar' },
+          React.createElement('div', { className: 'flex items-center gap-8' },
+            React.createElement('button', { className: 'mobile-menu-btn', onClick: () => setSidebarOpen(true) }, '☰'),
+            React.createElement('h1', { className: 'topbar-title' }, pageTitle[page])
+          ),
+          React.createElement('div', { className: 'topbar-actions' },
+            React.createElement('span', { className: 'text-sm text-muted' }, new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }))
+          )
+        ),
+        React.createElement('div', { className: 'page-content' },
+          page === 'dashboard' && React.createElement(Dashboard),
+          page === 'properties' && React.createElement(PropertiesPage),
+          page === 'units' && React.createElement(UnitsPage),
+          page === 'tenants' && React.createElement(TenantsPage),
+          page === 'payments' && React.createElement(PaymentsPage),
+          page === 'reports' && React.createElement(ReportsPage)
+        )
+      )
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(React.createElement(App));
+</script>
+</body>
+</html>
